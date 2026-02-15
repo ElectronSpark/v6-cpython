@@ -2322,10 +2322,10 @@ config_usage(int error, const wchar_t* program)
 {
     FILE *f = error ? stderr : stdout;
 
-    fprintf(f, usage_line, program);
     if (error)
         fprintf(f, "Try `python -h' for more information.\n");
     else {
+        fprintf(f, usage_line, program);
         fputs(usage_help, f);
     }
 }

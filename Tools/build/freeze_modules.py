@@ -56,6 +56,12 @@ FROZEN = [
         # those extra modules add to the text printed during the build.
         # (See https://github.com/python/cpython/pull/28398#pullrequestreview-756856469.)
         #'<encodings.*>',
+        # xv6: freeze only the encodings needed for fs_encoding init
+        '<encodings>',
+        'encodings.aliases',
+        'encodings.utf_8',
+        'encodings.ascii',
+        'encodings.latin_1',
         'io',
         ]),
     ('stdlib - startup, with site', [

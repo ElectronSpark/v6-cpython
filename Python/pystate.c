@@ -66,36 +66,47 @@ _Py_thread_local PyThreadState *_Py_tss_tstate = NULL;
 #endif
 
 static inline PyThreadState *
-current_fast_get(_PyRuntimeState *Py_UNUSED(runtime))
+current_fast_get(_PyRuntimeState *runtime)
 {
 #ifdef HAVE_THREAD_LOCAL
     return _Py_tss_tstate;
 #else
-    // XXX Fall back to the PyThread_tss_*() API.
-#  error "no supported thread-local variable storage classifier"
+    if (!PyThread_tss_is_created(&runtime->autoTSSkey)) {
+        return NULL;
+    }
+    return (PyThreadState *)PyThread_tss_get(&runtime->autoTSSkey);
 #endif
 }
 
 static inline void
-current_fast_set(_PyRuntimeState *Py_UNUSED(runtime), PyThreadState *tstate)
+current_fast_set(_PyRuntimeState *runtime, PyThreadState *tstate)
 {
     assert(tstate != NULL);
 #ifdef HAVE_THREAD_LOCAL
     _Py_tss_tstate = tstate;
 #else
-    // XXX Fall back to the PyThread_tss_*() API.
-#  error "no supported thread-local variable storage classifier"
+    if (!PyThread_tss_is_created(&runtime->autoTSSkey)) {
+        if (PyThread_tss_create(&runtime->autoTSSkey) != 0) {
+            Py_FatalError("failed to create current tstate TSS key");
+        }
+    }
+    if (PyThread_tss_set(&runtime->autoTSSkey, (void *)tstate) != 0) {
+        Py_FatalError("failed to set current tstate (TSS)");
+    }
 #endif
 }
 
 static inline void
-current_fast_clear(_PyRuntimeState *Py_UNUSED(runtime))
+current_fast_clear(_PyRuntimeState *runtime)
 {
 #ifdef HAVE_THREAD_LOCAL
     _Py_tss_tstate = NULL;
 #else
-    // XXX Fall back to the PyThread_tss_*() API.
-#  error "no supported thread-local variable storage classifier"
+    if (PyThread_tss_is_created(&runtime->autoTSSkey)) {
+        if (PyThread_tss_set(&runtime->autoTSSkey, NULL) != 0) {
+            Py_FatalError("failed to clear current tstate (TSS)");
+        }
+    }
 #endif
 }
 

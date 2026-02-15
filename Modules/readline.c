@@ -1411,6 +1411,14 @@ call_readline(FILE *sys_stdin, FILE *sys_stdout, const char *prompt)
     if (sys_stdin != rl_instream || sys_stdout != rl_outstream) {
         rl_instream = sys_stdin;
         rl_outstream = sys_stdout;
+        /*
+         * xv6/newlib: Force rl_outstream to unbuffered mode so that
+         * readline's character-by-character echo (via putc + fflush)
+         * reaches the UART immediately.  Without this, newlib's stdio
+         * buffering can prevent single-character writes from appearing
+         * on the console until a larger flush occurs.
+         */
+        setvbuf(sys_stdout, NULL, _IONBF, 0);
 #ifdef HAVE_RL_COMPLETION_APPEND_CHARACTER
         rl_prep_terminal (1);
 #endif
