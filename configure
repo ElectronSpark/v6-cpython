@@ -4283,6 +4283,9 @@ then
 	*-*-wasi)
 	    ac_sys_system=WASI
 	    ;;
+	*-*-xv6*)
+	    ac_sys_system=xv6
+	    ;;
 	*)
 		# for now, limit cross builds to known configurations
 		MACHDEP="unknown"
@@ -4309,6 +4312,7 @@ then
 	linux*) MACHDEP="linux";;
 	cygwin*) MACHDEP="cygwin";;
 	darwin*) MACHDEP="darwin";;
+	xv6*) MACHDEP="xv6";;
 	'')	MACHDEP="unknown";;
     esac
 
@@ -4343,6 +4347,9 @@ if test "$cross_compiling" = yes; then
 		_host_cpu=$host_cpu
 		;;
 	wasm32-*-* | wasm64-*-*)
+		_host_cpu=$host_cpu
+		;;
+	*-*-xv6*)
 		_host_cpu=$host_cpu
 		;;
 	*)
