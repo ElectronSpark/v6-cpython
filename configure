@@ -12822,7 +12822,7 @@ then
 	Emscripten*|WASI*)
 		LDSHARED='$(CC) -shared'
 		LDCXXSHARED='$(CXX) -shared';;
-	Linux*|GNU*|QNX*|VxWorks*|Haiku*)
+	Linux*|GNU*|QNX*|VxWorks*|Haiku*|xv6*)
 		LDSHARED='$(CC) -shared'
 		LDCXXSHARED='$(CXX) -shared';;
 	FreeBSD*)
@@ -12908,7 +12908,7 @@ then
 		 else CCSHARED="+z";
 		 fi;;
 	Linux-android*) ;;
-	Linux*|GNU*) CCSHARED="-fPIC";;
+	Linux*|GNU*|xv6*) CCSHARED="-fPIC";;
 	Emscripten*|WASI*)
 		if test "x$enable_wasm_dynamic_linking" = xyes
 then :
