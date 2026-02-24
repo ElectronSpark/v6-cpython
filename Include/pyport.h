@@ -686,7 +686,7 @@ extern char * _getpty(int *, int, mode_t, int);
 #  error "Py_TRACE_REFS ABI is not compatible with release and debug ABI"
 #endif
 
-#if defined(__ANDROID__) || defined(__VXWORKS__) || defined(__riscv)
+#if defined(__ANDROID__) || defined(__VXWORKS__) || defined(__riscv) || defined(__x86_64__)
    // Use UTF-8 as the locale encoding, ignore the LC_CTYPE locale.
    // See _Py_GetLocaleEncoding(), PyUnicode_DecodeLocale()
    // and PyUnicode_EncodeLocale().

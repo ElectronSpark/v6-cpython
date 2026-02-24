@@ -76,7 +76,7 @@ static const char libedit_version_tag[] = "EditLine wrapper";
 static int8_t libedit_history_start = 0;
 static int8_t libedit_append_replace_history_offset = 0;
 
-#if defined(__riscv)
+#if defined(__riscv) || defined(__x86_64__)
 static int xv6_readline_getc(FILE *stream);
 #endif
 
@@ -1293,7 +1293,7 @@ setup_readline(readlinestate *mod_state)
 
     if (!using_libedit_emulation)
     {
-#if defined(__riscv)
+#if defined(__riscv) || defined(__x86_64__)
         rl_getc_function = xv6_readline_getc;
 #endif
         if (!isatty(STDOUT_FILENO)) {
@@ -1325,7 +1325,7 @@ setup_readline(readlinestate *mod_state)
     return 0;
 }
 
-#if defined(__riscv)
+#if defined(__riscv) || defined(__x86_64__)
 static int
 xv6_readline_getc(FILE *stream)
 {
@@ -1451,7 +1451,7 @@ call_readline(FILE *sys_stdin, FILE *sys_stdout, const char *prompt)
 #endif
     }
 
-#if defined(__riscv)
+#if defined(__riscv) || defined(__x86_64__)
     /*
      * xv6 port: the select()+rl_callback_* loop can miss tty readiness and
      * leave the REPL stuck at the prompt with no key processing.
