@@ -460,17 +460,9 @@ def enablerlcompleter():
         import atexit
         try:
             import readline
+            import rlcompleter
         except ImportError:
             return
-
-        # On xv6, importing rlcompleter pulls in inspect/ast/re and can hit
-        # allocator failures during startup. Keep line editing/history enabled
-        # by default and make completer import opt-in.
-        if os.environ.get("XV6_ENABLE_RLCOMPLETER") == "1":
-            try:
-                import rlcompleter
-            except ImportError:
-                pass
 
         # Reading the initialization (config) file may not be enough to set a
         # completion key, so we set one first and then read the file.
@@ -580,7 +572,7 @@ def execsitecustomize():
             else:
                 raise
     except Exception as err:
-        if sys.flags.verbose or os.environ.get("PYTHONVERBOSE"):
+        if sys.flags.verbose:
             sys.excepthook(*sys.exc_info())
         else:
             sys.stderr.write(
@@ -600,7 +592,7 @@ def execusercustomize():
             else:
                 raise
     except Exception as err:
-        if sys.flags.verbose or os.environ.get("PYTHONVERBOSE"):
+        if sys.flags.verbose:
             sys.excepthook(*sys.exc_info())
         else:
             sys.stderr.write(
@@ -632,7 +624,7 @@ def main():
     setquit()
     setcopyright()
     sethelper()
-    if not sys.flags.isolated and os.environ.get("XV6_DISABLE_READLINE") != "1":
+    if not sys.flags.isolated:
         enablerlcompleter()
     execsitecustomize()
     if ENABLE_USER_SITE:
