@@ -2494,10 +2494,6 @@ _PyTrash_get_state(PyThreadState *tstate)
     if (tstate != NULL) {
         return &tstate->trash;
     }
-#if PY_NO_THREAD_LOCAL
-    static struct _py_trashcan trash;
-    return &trash;
-#else
     // The current thread must be finalizing.
     // Fall back to using thread-local state.
     // XXX Use thread-local variable syntax?
@@ -2512,7 +2508,6 @@ _PyTrash_get_state(PyThreadState *tstate)
         PyThread_tss_set(&_PyRuntime.trashTSSkey, (void *)trash);
     }
     return trash;
-#endif
 }
 
 static void
@@ -2522,9 +2517,6 @@ _PyTrash_clear_state(PyThreadState *tstate)
         assert(tstate->trash.delete_later == NULL);
         return;
     }
-#if PY_NO_THREAD_LOCAL
-    return;
-#else
     if (PyThread_tss_is_created(&_PyRuntime.trashTSSkey)) {
         struct _py_trashcan *trash =
             (struct _py_trashcan *)PyThread_tss_get(&_PyRuntime.trashTSSkey);
@@ -2533,18 +2525,12 @@ _PyTrash_clear_state(PyThreadState *tstate)
             PyMem_RawFree(trash);
         }
     }
-#endif
 }
 
 
 int
 _PyTrash_begin(PyThreadState *tstate, PyObject *op)
 {
-#if PY_NO_THREAD_LOCAL
-    if (tstate == NULL) {
-        return 0;
-    }
-#endif
     // XXX Make sure the GIL is held.
     struct _py_trashcan *trash = _PyTrash_get_state(tstate);
     if (trash->delete_nesting >= _PyTrash_UNWIND_LEVEL) {
@@ -2561,11 +2547,6 @@ _PyTrash_begin(PyThreadState *tstate, PyObject *op)
 void
 _PyTrash_end(PyThreadState *tstate)
 {
-#if PY_NO_THREAD_LOCAL
-    if (tstate == NULL) {
-        return;
-    }
-#endif
     // XXX Make sure the GIL is held.
     struct _py_trashcan *trash = _PyTrash_get_state(tstate);
     --trash->delete_nesting;

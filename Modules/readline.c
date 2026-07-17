@@ -11,7 +11,6 @@
 #include <signal.h>
 #include <stddef.h>
 #include <stdlib.h>               // free()
-#include <unistd.h>               // read(), fileno()
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -75,10 +74,6 @@ static const char libedit_version_tag[] = "EditLine wrapper";
 
 static int8_t libedit_history_start = 0;
 static int8_t libedit_append_replace_history_offset = 0;
-
-#if defined(__riscv) || defined(__x86_64__)
-static int xv6_readline_getc(FILE *stream);
-#endif
 
 #ifdef HAVE_RL_COMPLETION_DISPLAY_MATCHES_HOOK
 static void
@@ -1293,9 +1288,6 @@ setup_readline(readlinestate *mod_state)
 
     if (!using_libedit_emulation)
     {
-#if defined(__riscv) || defined(__x86_64__)
-        rl_getc_function = xv6_readline_getc;
-#endif
         if (!isatty(STDOUT_FILENO)) {
             /* Issue #19884: stdout is not a terminal. Disable meta modifier
                keys to not write the ANSI sequence "\033[1034h" into stdout. On
@@ -1324,25 +1316,6 @@ setup_readline(readlinestate *mod_state)
     RESTORE_LOCALE(saved_locale)
     return 0;
 }
-
-#if defined(__riscv) || defined(__x86_64__)
-static int
-xv6_readline_getc(FILE *stream)
-{
-    unsigned char ch;
-    int fd = fileno(stream);
-    for (;;) {
-        ssize_t n = read(fd, &ch, 1);
-        if (n == 1)
-            return (int)ch;
-        if (n == 0)
-            continue;
-        if (errno == EINTR)
-            return EOF;
-        return EOF;
-    }
-}
-#endif
 
 /* Wrapper around GNU readline that handles signals differently. */
 
@@ -1438,30 +1411,12 @@ call_readline(FILE *sys_stdin, FILE *sys_stdout, const char *prompt)
     if (sys_stdin != rl_instream || sys_stdout != rl_outstream) {
         rl_instream = sys_stdin;
         rl_outstream = sys_stdout;
-        /*
-         * xv6/newlib: Force rl_outstream to unbuffered mode so that
-         * readline's character-by-character echo (via putc + fflush)
-         * reaches the UART immediately.  Without this, newlib's stdio
-         * buffering can prevent single-character writes from appearing
-         * on the console until a larger flush occurs.
-         */
-        setvbuf(sys_stdout, NULL, _IONBF, 0);
 #ifdef HAVE_RL_COMPLETION_APPEND_CHARACTER
         rl_prep_terminal (1);
 #endif
     }
 
-#if defined(__riscv) || defined(__x86_64__)
-    /*
-     * xv6 port: the select()+rl_callback_* loop can miss tty readiness and
-     * leave the REPL stuck at the prompt with no key processing.
-     * Use blocking readline() directly on this target.
-     */
-    signal = 0;
-    p = readline(prompt);
-#else
     p = readline_until_enter_or_signal(prompt, &signal);
-#endif
 
     /* we got an interrupt signal */
     if (signal) {

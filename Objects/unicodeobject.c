@@ -3372,12 +3372,7 @@ _Py_normalize_encoding(const char *encoding,
             break;
         }
 
-        unsigned char uc = (unsigned char)c;
-        int is_ascii_alnum =
-            ((uc >= '0' && uc <= '9') || (uc >= 'A' && uc <= 'Z') ||
-             (uc >= 'a' && uc <= 'z'));
-
-        if (is_ascii_alnum || c == '.') {
+        if (Py_ISALNUM(c) || c == '.') {
             if (punct && l != lower) {
                 if (l == l_end) {
                     return 0;
@@ -3389,12 +3384,7 @@ _Py_normalize_encoding(const char *encoding,
             if (l == l_end) {
                 return 0;
             }
-            if (uc >= 'A' && uc <= 'Z') {
-                *l++ = (char)(uc - 'A' + 'a');
-            }
-            else {
-                *l++ = (char)uc;
-            }
+            *l++ = Py_TOLOWER(c);
         }
         else {
             punct = 1;

@@ -659,23 +659,21 @@ extern char * _getpty(int *, int, mode_t, int);
 
 #ifdef WITH_THREAD
 #  ifdef Py_BUILD_CORE
-#    if !defined(PY_NO_THREAD_LOCAL)
-#      ifdef HAVE_THREAD_LOCAL
-#        error "HAVE_THREAD_LOCAL is already defined"
-#      endif
-#      define HAVE_THREAD_LOCAL 1
-#      ifdef thread_local
-#        define _Py_thread_local thread_local
-#      elif __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_THREADS__)
-#        define _Py_thread_local _Thread_local
-#      elif defined(_MSC_VER)  /* AKA NT_THREADS */
-#        define _Py_thread_local __declspec(thread)
-#      elif defined(__GNUC__)  /* includes clang */
-#        define _Py_thread_local __thread
-#      else
-     // fall back to the PyThread_tss_*() API, or ignore.
-#        undef HAVE_THREAD_LOCAL
-#      endif
+#    ifdef HAVE_THREAD_LOCAL
+#      error "HAVE_THREAD_LOCAL is already defined"
+#    endif
+#    define HAVE_THREAD_LOCAL 1
+#    ifdef thread_local
+#      define _Py_thread_local thread_local
+#    elif __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_THREADS__)
+#      define _Py_thread_local _Thread_local
+#    elif defined(_MSC_VER)  /* AKA NT_THREADS */
+#      define _Py_thread_local __declspec(thread)
+#    elif defined(__GNUC__)  /* includes clang */
+#      define _Py_thread_local __thread
+#    else
+       // fall back to the PyThread_tss_*() API, or ignore.
+#      undef HAVE_THREAD_LOCAL
 #    endif
 #  endif
 #endif
@@ -686,7 +684,7 @@ extern char * _getpty(int *, int, mode_t, int);
 #  error "Py_TRACE_REFS ABI is not compatible with release and debug ABI"
 #endif
 
-#if defined(__ANDROID__) || defined(__VXWORKS__) || defined(__riscv) || defined(__x86_64__)
+#if defined(__ANDROID__) || defined(__VXWORKS__)
    // Use UTF-8 as the locale encoding, ignore the LC_CTYPE locale.
    // See _Py_GetLocaleEncoding(), PyUnicode_DecodeLocale()
    // and PyUnicode_EncodeLocale().

@@ -4283,9 +4283,6 @@ then
 	*-*-wasi)
 	    ac_sys_system=WASI
 	    ;;
-	*-*-xv6*)
-	    ac_sys_system=xv6
-	    ;;
 	*)
 		# for now, limit cross builds to known configurations
 		MACHDEP="unknown"
@@ -4312,7 +4309,6 @@ then
 	linux*) MACHDEP="linux";;
 	cygwin*) MACHDEP="cygwin";;
 	darwin*) MACHDEP="darwin";;
-	xv6*) MACHDEP="xv6";;
 	'')	MACHDEP="unknown";;
     esac
 
@@ -4347,9 +4343,6 @@ if test "$cross_compiling" = yes; then
 		_host_cpu=$host_cpu
 		;;
 	wasm32-*-* | wasm64-*-*)
-		_host_cpu=$host_cpu
-		;;
-	*-*-xv6*)
 		_host_cpu=$host_cpu
 		;;
 	*)
@@ -7514,7 +7507,7 @@ printf "%s\n" "#define Py_ENABLE_SHARED 1" >>confdefs.h
 	      PY3LIBRARY=libpython3.so
 	  fi
           ;;
-    Linux*|GNU*|NetBSD*|FreeBSD*|DragonFly*|OpenBSD*|VxWorks*|xv6*)
+    Linux*|GNU*|NetBSD*|FreeBSD*|DragonFly*|OpenBSD*|VxWorks*)
 	  LDLIBRARY='libpython$(LDVERSION).so'
 	  BLDLIBRARY='-L. -lpython$(LDVERSION)'
 	  RUNSHARED=LD_LIBRARY_PATH=`pwd`${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
@@ -12822,7 +12815,7 @@ then
 	Emscripten*|WASI*)
 		LDSHARED='$(CC) -shared'
 		LDCXXSHARED='$(CXX) -shared';;
-	Linux*|GNU*|QNX*|VxWorks*|Haiku*|xv6*)
+	Linux*|GNU*|QNX*|VxWorks*|Haiku*)
 		LDSHARED='$(CC) -shared'
 		LDCXXSHARED='$(CXX) -shared';;
 	FreeBSD*)
@@ -12908,7 +12901,7 @@ then
 		 else CCSHARED="+z";
 		 fi;;
 	Linux-android*) ;;
-	Linux*|GNU*|xv6*) CCSHARED="-fPIC";;
+	Linux*|GNU*) CCSHARED="-fPIC";;
 	Emscripten*|WASI*)
 		if test "x$enable_wasm_dynamic_linking" = xyes
 then :
@@ -12947,7 +12940,6 @@ then
 #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
 	Linux-android*) LINKFORSHARED="-pie -Xlinker -export-dynamic";;
 	Linux*|GNU*) LINKFORSHARED="-Xlinker -export-dynamic";;
-	xv6*) LINKFORSHARED="-Xlinker -export-dynamic";;
 	# -u libsys_s pulls in all symbols in libsys
 	Darwin/*)
 		LINKFORSHARED="$extra_undefs -framework CoreFoundation"
